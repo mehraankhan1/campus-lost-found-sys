@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [20.x] # Using Node 20 only for simplicity
 
     steps:
       # 1️⃣ Checkout repository
@@ -27,42 +27,48 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
-      # 3️⃣ Install dependencies (root)
+      # 3️⃣ Install backend dependencies
       - name: Install backend dependencies
-        run: npm ci
+        run: |
+          cd backend
+          npm ci
 
-      # 4️⃣ Setup test environment (optional)
+      # 4️⃣ Setup backend test environment
       - name: Setup test environment
         run: |
-          mkdir -p test
-          echo "global.NotificationService = class { notify() { return true } };" > test/setup-mock.js
+          mkdir -p backend/test
+          echo "global.NotificationService = class { notify() { return true } };" > backend/test/setup-mock.js
 
-      # 5️⃣ Run ESLint (if exists)
-      - name: Run ESLint
-        run: npm run lint --if-present
+      # 5️⃣ Run backend ESLint (optional)
+      - name: Run backend ESLint
+        run: |
+          cd backend
+          npm run lint --if-present || echo "No ESLint configured, skipping"
 
       # 6️⃣ Run backend tests
       - name: Run backend tests
         env:
           NODE_ENV: test
         run: |
+          cd backend
           if [ -d "test" ]; then
             npx mocha --require test/setup-mock.js test/*.js || echo "No tests found, skipping"
           else
             echo "No test folder, skipping tests"
           fi
 
-      # 7️⃣ Build frontend (ignore CI warnings)
+      # 7️⃣ Install frontend dependencies & build
       - name: Build frontend
         run: |
           cd frontend
           npm ci
-          CI=false npm run build
+          CI=false npm run build # ignores ESLint warnings in CI
 
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
