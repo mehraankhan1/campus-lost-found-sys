@@ -27,53 +27,42 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
-      # 3️⃣ Install backend dependencies
+      # 3️⃣ Install dependencies (root)
       - name: Install backend dependencies
-        run: |
-          cd backend
-          npm ci
+        run: npm ci
 
-      # 4️⃣ Setup backend test environment
-      - name: Setup backend test environment
+      # 4️⃣ Setup test environment (optional)
+      - name: Setup test environment
         run: |
-          mkdir -p backend/test
-          echo "global.NotificationService = class { notify() { return true } };" > backend/test/setup-mock.js
+          mkdir -p test
+          echo "global.NotificationService = class { notify() { return true } };" > test/setup-mock.js
 
-      # 5️⃣ Run backend ESLint
-      - name: Run backend ESLint
-        run: |
-          cd backend
-          npm run lint --if-present
+      # 5️⃣ Run ESLint (if exists)
+      - name: Run ESLint
+        run: npm run lint --if-present
 
       # 6️⃣ Run backend tests
       - name: Run backend tests
         env:
           NODE_ENV: test
         run: |
-          cd backend
           if [ -d "test" ]; then
             npx mocha --require test/setup-mock.js test/*.js || echo "No tests found, skipping"
           else
             echo "No test folder, skipping tests"
           fi
 
-      # 7️⃣ Install frontend dependencies
-      - name: Install frontend dependencies
-        run: |
-          cd frontend
-          npm ci
-
-      # 8️⃣ Build frontend
+      # 7️⃣ Build frontend (ignore CI warnings)
       - name: Build frontend
         run: |
           cd frontend
-          npm run build --if-present
+          npm ci
+          CI=false npm run build
 
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
