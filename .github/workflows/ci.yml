@@ -13,10 +13,10 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x] # Use only Node 20 for simplicity
+        node-version: [20.x] # Node 20 only for simplicity
 
     steps:
-      # 1️⃣ Checkout your repo
+      # 1️⃣ Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -27,39 +27,48 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
-      # 3️⃣ Install dependencies
-      - name: Install dependencies
-        run: npm ci
-
-      # 4️⃣ Skip test setup if folder doesn't exist
-      - name: Setup test environment (optional)
+      # 3️⃣ Install backend dependencies
+      - name: Install backend dependencies
         run: |
-          mkdir -p test
-          echo "global.NotificationService = class { notify() { return true } };" > test/setup-mock.js
+          cd backend
+          npm ci
+
+      # 4️⃣ Setup test environment (mock notifications)
+      - name: Setup test environment
+        run: |
+          mkdir -p backend/test
+          echo "global.NotificationService = class { notify() { return true } };" > backend/test/setup-mock.js
 
       # 5️⃣ Run ESLint if exists
       - name: Run ESLint
-        run: npm run lint --if-present
+        run: |
+          cd backend
+          npm run lint --if-present
 
-      # 6️⃣ Run tests if exists
-      - name: Run tests
+      # 6️⃣ Run backend tests
+      - name: Run backend tests
         env:
           NODE_ENV: test
         run: |
+          cd backend
           if [ -d "test" ]; then
             npx mocha --require test/setup-mock.js test/*.js || echo "No tests found, skipping"
           else
             echo "No test folder, skipping tests"
           fi
 
-      # 7️⃣ Build app if present
-      - name: Build app
-        run: npm run build --if-present
+      # 7️⃣ Build frontend if present
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run build --if-present
 
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
