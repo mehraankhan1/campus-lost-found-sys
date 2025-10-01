@@ -3,30 +3,28 @@ const ClaimModel = require("../models/Claim");
 const ItemModel = require("../models/Item");
 const { notifier, emailAdapter, UserFactory } = require("../services");
 
+// 🔹 Constants for default messages and statuses
+const ERROR_MESSAGES = {
+  REQUIRED_FIELDS: "All fields are required",
+  ITEM_NOT_FOUND: "Item not found",
+  CLAIM_NOT_FOUND: "Claim not found",
+};
+
+const ITEM_STATUS = {
+  CLAIMED: "claimed",
+};
+
 exports.createClaim = async (req, res) => {
   try {
-    console.log("===== CREATE CLAIM =====");
-    console.log("Request body:", req.body);
-    console.log("Headers:", req.headers);
-
     const { itemId, claimantName, claimantEmail, proofText } = req.body;
-    console.log("Parsed fields:", {
-      itemId,
-      claimantName,
-      claimantEmail,
-      proofText,
-    });
 
     // Validate required fields
     if (!itemId || !claimantName || !claimantEmail || !proofText) {
-      console.log("Missing required fields!");
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ error: ERROR_MESSAGES.REQUIRED_FIELDS });
     }
 
     const item = await ItemModel.findById(itemId);
-    console.log("Fetched item from DB:", item);
-
-    if (!item) return res.status(404).json({ error: "Item not found" });
+    if (!item) return res.status(404).json({ error: ERROR_MESSAGES.ITEM_NOT_FOUND });
 
     const claim = new ClaimModel({
       itemId,
@@ -35,11 +33,9 @@ exports.createClaim = async (req, res) => {
       proofText,
     });
     const savedClaim = await claim.save();
-    console.log("Saved claim:", savedClaim);
 
     res.status(201).json(savedClaim);
   } catch (err) {
-    console.error("ERROR in createClaim:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -47,14 +43,14 @@ exports.createClaim = async (req, res) => {
 exports.approveClaim = async (req, res) => {
   try {
     const claim = await ClaimModel.findById(req.params.id);
-    if (!claim) return res.status(404).json({ error: "Claim not found" });
+    if (!claim) return res.status(404).json({ error: ERROR_MESSAGES.CLAIM_NOT_FOUND });
 
     claim.approved = true;
     await claim.save();
 
     const item = await ItemModel.findById(claim.itemId);
     if (item) {
-      item.status = "claimed";
+      item.status = ITEM_STATUS.CLAIMED;
       await item.save();
     }
 
@@ -65,8 +61,8 @@ exports.approveClaim = async (req, res) => {
       "S-12345"
     );
     notifier.subscribe(student);
-    notifier.notify(`Your claim for ${item.title} has been approved!`);
-    emailAdapter.send(claim.claimantEmail, `Claim approved for ${item.title}`);
+    notifier.notify(Your claim for ${item.title} has been approved!);
+    emailAdapter.send(claim.claimantEmail, Claim approved for ${item.title});
 
     res.json({ message: "Claim approved", claim });
   } catch (err) {
