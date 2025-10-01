@@ -1,15 +1,42 @@
 // frontend/src/components/ClaimForm.js
 import React from "react";
 
-/**
- * ClaimForm
- * Props:
- *  - claimData: { itemId, claimantName, claimantEmail, proofText }
- *  - onChange: event handler for inputs
- *  - onSubmit: submit handler
- *  - onVerify: handler for verify email
- *  - loading: optional boolean to disable actions while waiting
- */
+// 🔹 Centralized constants for ClaimForm
+const CLAIM_FORM_CONSTANTS = {
+  HEADER: {
+    TITLE: "Submit a Claim",
+    SUBTITLE: "Provide evidence so staff can verify ownership faster.",
+  },
+  ITEM_ID: {
+    LABEL: "Item ID",
+    PLACEHOLDER: "Item ID (paste or leave blank)",
+    INFO: "This claim will be linked to the selected item.",
+  },
+  NAME: {
+    LABEL: "Full name",
+    PLACEHOLDER: "Your full name",
+    ARIA_LABEL: "Full name",
+  },
+  EMAIL: {
+    LABEL: "Email",
+    PLACEHOLDER: "you@student.qut.edu.au",
+    INFO: "Use QUT email for faster verification.",
+    ARIA_LABEL: "Email address",
+  },
+  PROOF: {
+    LABEL: "Proof / Details",
+    PLACEHOLDER:
+      "Describe why this item is yours (serial numbers, unique marks, where/when you lost it)...",
+  },
+  BUTTONS: {
+    SUBMIT: "Submit Claim",
+    SUBMITTING: "Submitting...",
+    VERIFY: "Verify Email",
+    VERIFY_DISABLED_TITLE: "Enter an email first",
+    VERIFY_ENABLED_TITLE: "Verify email",
+  },
+};
+
 export default function ClaimForm({
   claimData = {},
   onChange,
@@ -20,17 +47,15 @@ export default function ClaimForm({
   return (
     <section className="form-section claim-form-section card">
       <div className="form-header">
-        <h2>Submit a Claim</h2>
-        <p className="muted">
-          Provide evidence so staff can verify ownership faster.
-        </p>
+        <h2>{CLAIM_FORM_CONSTANTS.HEADER.TITLE}</h2>
+        <p className="muted">{CLAIM_FORM_CONSTANTS.HEADER.SUBTITLE}</p>
       </div>
 
       <form onSubmit={onSubmit} className="claim-form-grid" noValidate>
         {/* If itemId already exists (from modal), show as read-only */}
         {claimData.itemId ? (
           <div className="form-row full">
-            <label className="label">Item ID</label>
+            <label className="label">{CLAIM_FORM_CONSTANTS.ITEM_ID.LABEL}</label>
             <input
               name="itemId"
               value={claimData.itemId}
@@ -39,15 +64,15 @@ export default function ClaimForm({
               className="input readonly"
             />
             <small className="muted">
-              This claim will be linked to the selected item.
+              {CLAIM_FORM_CONSTANTS.ITEM_ID.INFO}
             </small>
           </div>
         ) : (
           <div className="form-row full">
-            <label className="label">Item ID</label>
+            <label className="label">{CLAIM_FORM_CONSTANTS.ITEM_ID.LABEL}</label>
             <input
               name="itemId"
-              placeholder="Item ID (paste or leave blank)"
+              placeholder={CLAIM_FORM_CONSTANTS.ITEM_ID.PLACEHOLDER}
               value={claimData.itemId}
               onChange={onChange}
               className="input"
@@ -56,40 +81,38 @@ export default function ClaimForm({
         )}
 
         <div className="form-row">
-          <label className="label">Full name</label>
+          <label className="label">{CLAIM_FORM_CONSTANTS.NAME.LABEL}</label>
           <input
             name="claimantName"
-            placeholder="Your full name"
+            placeholder={CLAIM_FORM_CONSTANTS.NAME.PLACEHOLDER}
             value={claimData.claimantName}
             onChange={onChange}
             required
             className="input"
-            aria-label="Full name"
+            aria-label={CLAIM_FORM_CONSTANTS.NAME.ARIA_LABEL}
           />
         </div>
 
         <div className="form-row">
-          <label className="label">Email</label>
+          <label className="label">{CLAIM_FORM_CONSTANTS.EMAIL.LABEL}</label>
           <input
             type="email"
             name="claimantEmail"
-            placeholder="you@student.qut.edu.au"
+            placeholder={CLAIM_FORM_CONSTANTS.EMAIL.PLACEHOLDER}
             value={claimData.claimantEmail}
             onChange={onChange}
             required
             className="input"
-            aria-label="Email address"
+            aria-label={CLAIM_FORM_CONSTANTS.EMAIL.ARIA_LABEL}
           />
-          <small className="muted">
-            Use QUT email for faster verification.
-          </small>
+          <small className="muted">{CLAIM_FORM_CONSTANTS.EMAIL.INFO}</small>
         </div>
 
         <div className="form-row full">
-          <label className="label">Proof / Details</label>
+          <label className="label">{CLAIM_FORM_CONSTANTS.PROOF.LABEL}</label>
           <textarea
             name="proofText"
-            placeholder="Describe why this item is yours (serial numbers, unique marks, where/when you lost it)..."
+            placeholder={CLAIM_FORM_CONSTANTS.PROOF.PLACEHOLDER}
             value={claimData.proofText}
             onChange={onChange}
             rows="5"
@@ -101,7 +124,7 @@ export default function ClaimForm({
         <div className="form-actions full">
           <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading ? (
-              "Submitting..."
+              CLAIM_FORM_CONSTANTS.BUTTONS.SUBMITTING
             ) : (
               <>
                 <svg
@@ -115,7 +138,7 @@ export default function ClaimForm({
                     d="M5 20h14v-2H5v2zm7-18L5.33 9h3.34v6h5.66V9h3.34L12 2z"
                   />
                 </svg>
-                Submit Claim
+                {CLAIM_FORM_CONSTANTS.BUTTONS.SUBMIT}
               </>
             )}
           </button>
@@ -126,7 +149,9 @@ export default function ClaimForm({
             onClick={onVerify}
             disabled={loading || !claimData.claimantEmail}
             title={
-              !claimData.claimantEmail ? "Enter an email first" : "Verify email"
+              !claimData.claimantEmail
+                ? CLAIM_FORM_CONSTANTS.BUTTONS.VERIFY_DISABLED_TITLE
+                : CLAIM_FORM_CONSTANTS.BUTTONS.VERIFY_ENABLED_TITLE
             }
           >
             <svg
@@ -140,7 +165,7 @@ export default function ClaimForm({
                 d="M12 2L2 7l10 5 10-5-10-5zm0 13a7 7 0 1 1 0 14 7 7 0 0 1 0-14z"
               />
             </svg>
-            Verify Email
+            {CLAIM_FORM_CONSTANTS.BUTTONS.VERIFY}
           </button>
         </div>
       </form>
