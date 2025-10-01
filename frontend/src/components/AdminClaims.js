@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { adminAPI, claimAPI } from "../services/api";
 
+// 🔹 Constants for UI text
+const TEXT = {
+  HEADER: "Pending Claims",
+  LOADING: "Loading...",
+  NO_CLAIMS: "No pending claims.",
+  APPROVED: "Approved",
+  APPROVE: "Approve",
+  SUCCESS_ALERT: "Claim approved successfully!",
+  FAILURE_ALERT: "Failed to approve claim.",
+};
+
 export default function AdminClaims() {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -12,10 +23,7 @@ export default function AdminClaims() {
       const res = await adminAPI.getClaims();
       setClaims(res.data); // assuming backend returns array of claim objects
     } catch (err) {
-      console.error(
-        "Error fetching claims:",
-        err.response?.data || err.message
-      );
+      // silently fail without console log
     } finally {
       setLoading(false);
     }
@@ -29,28 +37,23 @@ export default function AdminClaims() {
   const handleApprove = async (claimId) => {
     try {
       setLoading(true);
-      const res = await claimAPI.approveClaim(claimId);
-      console.log(res.data);
-      alert("Claim approved successfully!");
+      await claimAPI.approveClaim(claimId);
+      alert(TEXT.SUCCESS_ALERT);
       // Refresh the list after approving
       fetchClaims();
     } catch (err) {
-      console.error(
-        "Error approving claim:",
-        err.response?.data || err.message
-      );
-      alert("Failed to approve claim.");
+      alert(TEXT.FAILURE_ALERT);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p>{TEXT.LOADING}</p>;
 
   return (
     <section className="admin-claims-card card">
-      <h2>Pending Claims</h2>
-      {claims.length === 0 && <p>No pending claims.</p>}
+      <h2>{TEXT.HEADER}</h2>
+      {claims.length === 0 && <p>{TEXT.NO_CLAIMS}</p>}
       <ul>
         {claims.map((claim) => (
           <li key={claim._id} style={{ marginBottom: 12 }}>
@@ -68,7 +71,7 @@ export default function AdminClaims() {
                 claim.approved ? "btn btn-secondary" : "btn btn-primary"
               }
             >
-              {claim.approved ? "Approved" : "Approve"}
+              {claim.approved ? TEXT.APPROVED : TEXT.APPROVE}
             </button>
           </li>
         ))}
