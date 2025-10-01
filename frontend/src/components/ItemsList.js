@@ -1,11 +1,16 @@
-// frontend/src/components/ItemsList.js
+
 import React from "react";
+
+const DEFAULT_TYPE = "lost";
+const DEFAULT_STATUS = "unclaimed";
+const DEFAULT_CATEGORY = "Other";
+const DEFAULT_OWNER = "—";
 
 /**
  * ItemsList
  * - items: array of item objects
  * - onDelete: function(itemId)
- * - onClaim: function(item)    <-- note: we pass the whole item so modal can show details
+ * - onClaim: function(item)
  */
 export default function ItemsList({ items = [], onDelete, onClaim }) {
   if (!Array.isArray(items) || items.length === 0) {
@@ -28,50 +33,49 @@ export default function ItemsList({ items = [], onDelete, onClaim }) {
       <h2>All Items ({items.length})</h2>
 
       <div className="items-grid">
-        {items.map((it) => (
+        {items.map((item) => (
           <article
-            key={it._id}
+            key={item._id}
             className="item-card"
             role="article"
-            aria-labelledby={`item-title-${it._id}`}
+            aria-labelledby={`item-title-${item._id}`}
           >
             <div className="item-top">
-              <div id={`item-title-${it._id}`} className="item-title">
-                {it.title || "Untitled"}
+              <div id={`item-title-${item._id}`} className="item-title">
+                {item.title || "Untitled"}
               </div>
 
               <div className="badges">
-                <span className={`badge type ${it.type || "lost"}`}>
-                  {(it.type || "lost").toUpperCase()}
+                <span className={`badge type ${item.type || DEFAULT_TYPE}`}>
+                  {(item.type || DEFAULT_TYPE).toUpperCase()}
                 </span>
-                <span className={`badge status ${it.status || "unclaimed"}`}>
-                  {(it.status || "unclaimed").toUpperCase()}
+                <span className={`badge status ${item.status || DEFAULT_STATUS}`}>
+                  {(item.status || DEFAULT_STATUS).toUpperCase()}
                 </span>
               </div>
             </div>
 
             <div className="item-body">
-              {/* Owner field may not exist in your model; show a dash if missing */}
               <div>
-                <strong>Owner:</strong> {it.claimantName || "—"}
+                <strong>Owner:</strong> {item.claimantName || DEFAULT_OWNER}
               </div>
               <div>
-                <strong>Category:</strong> {it.category || "Other"}
+                <strong>Category:</strong> {item.category || DEFAULT_CATEGORY}
               </div>
-              <div className="muted small">ID: {it._id}</div>
+              <div className="muted small">ID: {item._id}</div>
             </div>
 
             <div className="item-actions">
               <button
                 className="btn btn-claim"
-                onClick={() => onClaim(it)}
-                disabled={it.status === "claimed"}
+                onClick={() => onClaim(item)}
+                disabled={item.status === "claimed"}
                 title={
-                  it.status === "claimed"
+                  item.status === "claimed"
                     ? "Item already claimed"
                     : "Claim this item"
                 }
-                aria-disabled={it.status === "claimed"}
+                aria-disabled={item.status === "claimed"}
               >
                 <svg
                   className="btn-icon"
@@ -92,7 +96,7 @@ export default function ItemsList({ items = [], onDelete, onClaim }) {
               {localStorage.getItem("role") === "admin" && (
                 <button
                   className="btn btn-delete"
-                  onClick={() => onDelete(it._id)}
+                  onClick={() => onDelete(item._id)}
                   title="Delete this item"
                 >
                   <svg
