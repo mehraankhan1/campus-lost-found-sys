@@ -5,8 +5,27 @@ const { notifier, emailAdapter, UserFactory } = require("../services");
 
 exports.createClaim = async (req, res) => {
   try {
+    console.log("===== CREATE CLAIM =====");
+    console.log("Request body:", req.body);
+    console.log("Headers:", req.headers);
+
     const { itemId, claimantName, claimantEmail, proofText } = req.body;
+    console.log("Parsed fields:", {
+      itemId,
+      claimantName,
+      claimantEmail,
+      proofText,
+    });
+
+    // Validate required fields
+    if (!itemId || !claimantName || !claimantEmail || !proofText) {
+      console.log("Missing required fields!");
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
     const item = await ItemModel.findById(itemId);
+    console.log("Fetched item from DB:", item);
+
     if (!item) return res.status(404).json({ error: "Item not found" });
 
     const claim = new ClaimModel({
@@ -16,18 +35,11 @@ exports.createClaim = async (req, res) => {
       proofText,
     });
     const savedClaim = await claim.save();
-
-    const fakeStaff = UserFactory.createUser(
-      "staff",
-      "1",
-      "admin@campus.edu",
-      "Security"
-    );
-    notifier.subscribe(fakeStaff);
-    notifier.notify(`New claim for item: ${item.title}`);
+    console.log("Saved claim:", savedClaim);
 
     res.status(201).json(savedClaim);
   } catch (err) {
+    console.error("ERROR in createClaim:", err);
     res.status(500).json({ error: err.message });
   }
 };

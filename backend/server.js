@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const adminRoutes = require("./src/routes/adminRoutes");
 dotenv.config();
 
 // Connect to DB only if NOT running tests
@@ -16,7 +17,7 @@ app.use(express.json());
 app.use("/items", require("./src/routes/itemRoutes"));
 app.use("/claims", require("./src/routes/claimRoutes"));
 app.use("/verify", require("./src/routes/verifyRoutes"));
-
+app.use("/admin", adminRoutes);
 app.get("/", (req, res) => {
   res.send("Campus Lost and Found Backend is running!");
 });

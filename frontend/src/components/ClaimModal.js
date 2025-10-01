@@ -16,8 +16,12 @@ export default function ClaimModal({
       <div className="modal-content">
         <div className="modal-header">
           <h2>Claim Item</h2>
-          <button className="close-btn" onClick={onClose}>
-            ×
+          <button
+            className="close-btn"
+            onClick={onClose}
+            aria-label="Close modal"
+          >
+            <span>&times;</span>
           </button>
         </div>
 

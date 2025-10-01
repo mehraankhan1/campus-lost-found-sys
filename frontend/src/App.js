@@ -6,7 +6,8 @@ import ItemForm from "./components/ItemForm";
 import ItemsList from "./components/ItemsList";
 import ClaimModal from "./components/ClaimModal";
 import "./App.css";
-
+import StatsOverview from "./components/StatsOverview";
+import AdminClaims from "./components/AdminClaims";
 function App() {
   const [items, setItems] = useState([]);
   const [claims, setClaims] = useState([]); // for admin
@@ -312,54 +313,9 @@ function App() {
               )}
             </section>
           )}
+          {activeTab === "stats" && <StatsOverview items={items} />}
 
-          {activeTab === "stats" && (
-            <section className="card stats-card">
-              <h2>System Stats</h2>
-              <div className="stats-grid">
-                <div className="stat">
-                  <div className="stat-value">{items.length}</div>
-                  <div className="stat-label">Total items</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-value">
-                    {items.filter((i) => i.status === "unclaimed").length}
-                  </div>
-                  <div className="stat-label">Available</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-value">
-                    {items.filter((i) => i.status === "claimed").length}
-                  </div>
-                  <div className="stat-label">Claimed</div>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {activeTab === "admin" && role === "admin" && (
-            <section className="card">
-              <h2>Admin Dashboard</h2>
-              <div>
-                <h3>Lost Items</h3>
-                <ul>
-                  {lostItems.map((it) => (
-                    <li key={it._id}>
-                      {it.title} ({it.category})
-                    </li>
-                  ))}
-                </ul>
-                <h3>Claims</h3>
-                <ul>
-                  {claims.map((cl) => (
-                    <li key={cl._id}>
-                      {cl.claimantName} - {cl.claimantEmail} (Item: {cl.itemId})
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-          )}
+          {activeTab === "admin" && role === "admin" && <AdminClaims />}
         </main>
       </div>
 

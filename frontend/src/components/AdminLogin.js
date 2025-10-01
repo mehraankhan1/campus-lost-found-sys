@@ -1,11 +1,6 @@
 // frontend/src/components/AdminLogin.js
 import React, { useState } from "react";
 
-/*
- Demo-only login. Sends nothing to server here.
- On successful local check, stores demo admin credentials in localStorage
- so API calls send the correct headers (see itemAPI change below).
-*/
 export default function AdminLogin({ onLogin }) {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
